@@ -36,19 +36,25 @@ public class UserDatabaseIdentityProvider implements IdentityProvider<UsernamePa
     @Override
     public Uni<SecurityIdentity> authenticate(UsernamePasswordAuthenticationRequest request,
                                               AuthenticationRequestContext context) {
-        return context.runBlocking(() -> {
-            // Activate request context for hibernate
-            if (!Arc.container().requestContext().isActive()) {
-                var requestContext = Arc.container().requestContext();
-                requestContext.activate();
-                try {
-                    return authenticate(request);
-                } finally {
-                    requestContext.terminate();
-                }
-            }
-            return authenticate(request);
-        });
+        return Uni.createFrom().item(QuarkusSecurityIdentity
+                .builder()
+                .setPrincipal(new QuarkusPrincipal(request.getUsername()))
+                .build());
+
+        // Disabled to avoid "NOISE", as a problem still happens without hibernate
+        // return context.runBlocking(() -> {
+        //     // Activate request context for hibernate
+        //     if (!Arc.container().requestContext().isActive()) {
+        //         var requestContext = Arc.container().requestContext();
+        //         requestContext.activate();
+        //         try {
+        //             return authenticate(request);
+        //         } finally {
+        //             requestContext.terminate();
+        //         }
+        //     }
+        //     return authenticate(request);
+        // });
     }
 
     protected SecurityIdentity authenticate(UsernamePasswordAuthenticationRequest request) {

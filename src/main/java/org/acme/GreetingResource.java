@@ -13,6 +13,7 @@ public class GreetingResource {
     @RunOnVirtualThread
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() throws InterruptedException {
+        // Helps with reproduction, reducing it, reduces the frequency
         Thread.sleep(4000);
         return "Hello from Quarkus REST";
     }
